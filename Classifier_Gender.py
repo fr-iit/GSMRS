@@ -1,3 +1,22 @@
+'''
+Notes: To execute the experiments, we need to initialize three variables, which are listed below ->
+1. dataset, 2. FristFoldRQ2, 3. SecondFoldRQ2
+
+1. for 1st variable, set the value 'ml1m' or 'yahoo' to load required data, for example
+    dataset = 'yahoo'
+2. for 2nd variable, set the value 'Rating with GS' or 'Only Rating' to execute gender
+classifier with 4 inference algorithms, for example ->
+    FristFoldRQ2 = 'Rating with GS'
+3. for 3rd variable, set the 'LR' or 'SVM' to execute elaborate experiments of gender
+classification with those classifiers, which give good results with the first fold experiment.
+In our 1st fold experiment, logistic regression and support vector machine gave good results.
+For example, the variable's value should be set as
+    SecondFoldRQ2 = 'LR'
+
+Furthermore, you can get the variable location where it is initialized by coping the variable name
+and find(ctrl+F) it
+'''
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -188,58 +207,6 @@ def matthews_corrcoef(y_true, y_pred):
 
     return numerator / denominator
 
-# Load rating data and user genre preferences ML
-X, user_genre_pref, user_ratings, num_unique_users = load_ratingdata_ML()
-y = load_genderdata_ML()
-
-# Load rating data and user genre preferences yahoo
-#X, user_genre_pref, user_ratings, num_unique_users = load_ratingdata_yahoo()
-#y = load_genderdata_yahoo()
-
-male_prefer, female_prefer, info, ave_rate, genre_count = get_genre_preferences(user_genre_pref, user_ratings, num_unique_users)
-
-# RQ2.1
-print(info)
-print(len(info))
-# end RQ2.1
-
-X_with_genre = np.concatenate((male_prefer, female_prefer), axis=1)
-print("Shape of X:", X.shape)
-
-# Normalize data
-X_with_genre = normalize(X_with_genre)
-X= normalize(X)
-
-X_with_genre_pref = np.concatenate((X, X_with_genre), axis=1)
-print('shape of X_with_genre_pref after cat: ', X_with_genre_pref.shape)
-
-
-# Split data into train and test sets
-#RQ2
-X_train, X_test, y_train, y_test = train_test_split(X_with_genre_pref, y, test_size=0.2, random_state=42)
-X_Rtrain, X_Rtest, y_Rtrain, y_Rtest = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# ----- grid search
-# Define parameter grid
-param_grid = {
-    'penalty': ['l2'],
-    'C': [0.001, 0.01, 0.1, 1, 10, 100]
-}
-
-#logistic_regression = LogisticRegression(max_iter=1000)
-# Create GridSearchCV object
-#grid_search = GridSearchCV(logistic_regression, param_grid, cv=10, scoring='roc_auc')
-#grid_search.fit(X_with_genre_pref, y)
-
-# Access the best estimator and best parameters
-#best_model = grid_search.best_estimator_
-#best_params = grid_search.best_params_
-
-#print("Best model:", best_model)
-#print("Best parameters:", best_params)
-
-# ----- end grid search
-
 # RQ2: classifiers
 
 def drawConfusionMatrix(test, pred):
@@ -250,7 +217,6 @@ def drawConfusionMatrix(test, pred):
     plt.ylabel('Actual label')
     plt.xlabel('Predicted label')
     plt.show()
-
 
 def classifierLR(X_train, y_train, X_test, y_test):
     model = LogisticRegression(penalty='l2', C=1.0, random_state=0, max_iter=1000)
@@ -327,18 +293,7 @@ def classifierSVM(X_train, y_train, X_test, y_test):
     print("Accuracy:", accuracy)
     print('MCC SVM', matthews_corrcoef(y_test, y_pred))
 
-#print("GS with Rating")
-#classifierLR(X_train, y_train, X_test, y_test)
-#classifieradaboost(X_train, y_train, X_test, y_test)
-#classifierXG(X_train, y_train, X_test, y_test)
-#classifierSVM(X_train, y_train, X_test, y_test)
-
-#print("Rating only")
-#classifierLR(X_Rtrain, y_Rtrain, X_Rtest, y_Rtest)
-#classifieradaboost(X_Rtrain, y_Rtrain, X_Rtest, y_Rtest)
-#classifierXG(X_Rtrain, y_Rtrain, X_Rtest, y_Rtest)
-#classifierSVM(X_Rtrain, y_Rtrain, X_Rtest, y_Rtest)
-
+# for 2nd fold experiment for RQ2
 def crossvalidation(X_with_genre_pref, y):
 
     # Initialize StratifiedKFold with 10 folds
@@ -390,15 +345,92 @@ def crossvalidation(X_with_genre_pref, y):
     print("Average AUC: {:.3f}".format(average_auc), " Average Accuracy: {:.3f}".format(average_accuracy))
     print('Ave Precision: {:.3f}'.format(precision_check), ' ave recall: {:.3f}'.format(recall_check), ' F1: {:.3f}'.format(f1_check))
 
-print('LR')
-print('crossvalidation(X_with_genre_pref, y)')
-crossvalidation(X_with_genre_pref, y)
-print('crossvalidation(X, y)')
-crossvalidation(X, y)
+# calling functions
 
-#print('SVM')
-#print('crossvalidation(X_with_genre_pref, y)')
-#crossvalidation(X_with_genre_pref, y)
-#print('crossvalidation(X, y)')
-#crossvalidation(X, y)
+# Load data
+# declear required variables
+dataset = 'ml1m'
+# dataset = 'yahoo'
 
+FristFoldRQ2 = 'Rating with GS'
+# FristFoldRQ2 = 'Only Rating'
+
+SecondFoldRQ2 = 'LR'
+# SecondFoldRQ2 = 'SVM'
+
+if dataset == 'ml1m':
+    X, user_genre_pref, user_ratings, num_unique_users = load_ratingdata_ML()
+    y = load_genderdata_ML()
+elif dataset == 'yahoo':
+    X, user_genre_pref, user_ratings, num_unique_users = load_ratingdata_yahoo()
+    y = load_genderdata_yahoo()
+
+male_prefer, female_prefer, info, ave_rate, genre_count = get_genre_preferences(user_genre_pref, user_ratings, num_unique_users)
+
+X_with_genre = np.concatenate((male_prefer, female_prefer), axis=1)
+print("Shape of X:", X.shape)
+
+# Normalize data
+X_with_genre = normalize(X_with_genre)
+X= normalize(X)
+
+X_with_genre_pref = np.concatenate((X, X_with_genre), axis=1)
+print('shape of X_with_genre_pref after concatenate: ', X_with_genre_pref.shape)
+
+
+# Split data into train and test sets
+X_train, X_test, y_train, y_test = train_test_split(X_with_genre_pref, y, test_size=0.2, random_state=42)
+X_Rtrain, X_Rtest, y_Rtrain, y_Rtest = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# ----- grid search
+# Define parameter grid
+# param_grid = {
+#     'penalty': ['l2'],
+#     'C': [0.001, 0.01, 0.1, 1, 10, 100]
+# }
+
+#logistic_regression = LogisticRegression(max_iter=1000)
+# Create GridSearchCV object
+#grid_search = GridSearchCV(logistic_regression, param_grid, cv=10, scoring='roc_auc')
+#grid_search.fit(X_with_genre_pref, y)
+
+# Access the best estimator and best parameters
+#best_model = grid_search.best_estimator_
+#best_params = grid_search.best_params_
+
+#print("Best model:", best_model)
+#print("Best parameters:", best_params)
+
+# ----- end grid search
+
+if FristFoldRQ2 == 'Rating with GS':
+    print("GS with Rating")
+    classifierLR(X_train, y_train, X_test, y_test)
+    classifieradaboost(X_train, y_train, X_test, y_test)
+    classifierXG(X_train, y_train, X_test, y_test)
+    classifierSVM(X_train, y_train, X_test, y_test)
+
+elif FristFoldRQ2 == 'Only Rating':
+    print("Rating only")
+    classifierLR(X_Rtrain, y_Rtrain, X_Rtest, y_Rtest)
+    classifieradaboost(X_Rtrain, y_Rtrain, X_Rtest, y_Rtest)
+    classifierXG(X_Rtrain, y_Rtrain, X_Rtest, y_Rtest)
+    classifierSVM(X_Rtrain, y_Rtrain, X_Rtest, y_Rtest)
+
+if SecondFoldRQ2 == 'LR':
+    print('LR')
+    print('crossvalidation(X_with_genre_pref, y)')
+    crossvalidation(X_with_genre_pref, y)
+    print('crossvalidation(X, y)')
+    crossvalidation(X, y)
+elif SecondFoldRQ2 == 'SVM':
+    print('SVM')
+    print('crossvalidation(X_with_genre_pref, y)')
+    crossvalidation(X_with_genre_pref, y)
+    print('crossvalidation(X, y)')
+    crossvalidation(X, y)
+
+# RQ2.1
+print(info)
+print(len(info))
+# end RQ2.1
